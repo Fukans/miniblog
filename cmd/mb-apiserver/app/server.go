@@ -7,11 +7,10 @@
 package app
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"github.com/onexstack/miniblog/cmd/mb-apiserver/app/options"
 	"github.com/onexstack/miniblog/pkg/version"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var configFile string // 配置文件路径
@@ -62,6 +61,12 @@ The project features include:
 	}
 
 	// 初始化配置函数，在每个命令运行时调用
+	/*
+		cobra.OnInitialize 的执行发生在以下阶段：
+			在 cmd.Execute() 被调用后，但在 具体命令的 RunE 或 Run 方法执行之前。
+			在命令行参数解析之后（即 os.Args 已经被 Cobra 解析成命令和参数）。
+			无论用户输入了什么命令（包括根命令或子命令），OnInitialize 都会被执行（除非程序在解析参数时提前退出，如命令不存在）。
+	*/
 	cobra.OnInitialize(onInitialize)
 
 	// cobra 支持持久性标志(PersistentFlag)，该标志可用于它所分配的命令以及该命令下的每个子命令
