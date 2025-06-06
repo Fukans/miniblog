@@ -132,12 +132,19 @@ func (l *zapLogger) Sync() {
 	_ = l.z.Sync()
 }
 
+/*
+- 全局的 Debugw 函数调用 std.Debugw()，而 std 是一个 *zapLogger 实例。
+- *zapLogger 的 Debugw 方法可以封装额外的逻辑（如日志过滤、采样等），而全局的 Debugw 函数仍然可以复用这些逻辑。
+*/
+
 // Debugw 输出 debug 级别的日志.
 func Debugw(msg string, kvs ...any) {
 	std.Debugw(msg, kvs...)
 }
 
 func (l *zapLogger) Debugw(msg string, kvs ...any) {
+	// 这里可以添加额外的逻辑（如日志过滤、采样等）
+	// ...
 	l.z.Sugar().Debugw(msg, kvs...)
 }
 
