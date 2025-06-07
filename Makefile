@@ -7,7 +7,7 @@ PROJ_ROOT_DIR := $(abspath $(shell cd $(COMMON_SELF_DIR)/ && pwd -P))
 # 构建产物、临时文件存放目录
 OUTPUT_DIR := $(PROJ_ROOT_DIR)/_output
 # Protobuf 文件存放路径
-APIROOT=$(PROJ_ROOT_DIR)/pkg/api
+APIROOT := $(PROJ_ROOT_DIR)/pkg/api
 
 # ==============================================================================
 # 定义版本相关变量
@@ -66,9 +66,17 @@ clean: # 清理构建产物、临时文件等.
 .PHONY: protoc
 protoc: # 编译 protobuf 文件.
 	@echo "===========> Generate protobuf files"
+	@echo "APIROOT: $(APIROOT)"
 	@protoc                                              \
 		--proto_path=$(APIROOT)                          \
-		--proto_path=$(PROJ_ROOT_DIR)/third_party/protobuf    \
+		--proto_path=$(PROJ_ROOT_DIR)/third_party/protobuf \
 		--go_out=paths=source_relative:$(APIROOT)        \
 		--go-grpc_out=paths=source_relative:$(APIROOT)   \
 		$(shell find $(APIROOT) -name *.proto)
+
+# --proto_path  # 指定 protobuf 文件的搜索路径（即 import 语句查找 .proto 文件的路径）
+# --go_out      # 指定 生成的 Go 代码的输出路径，并控制生成的文件路径如何映射到 .proto 文件 路径。
+# --go-grpc_out # 指定 生成的 gRPC 代码的输出路径，并控制生成的文件路径如何映射到 .proto 文件路径。
+# $(shell find $(APIROOT) -name *.proto)  # 自动查找 $(APIROOT) 目录下所有的 .proto 文件，并作为 protoc 的输入文件
+# paths=source_relative 表示 生成的 Go 文件的路径与 .proto 文件的路径相对一致。
+  #例如，如果 miniblog.proto 在 $(APIROOT)/pkg/api/apiserver/v1/miniblog.proto，那么生成的 miniblog.pb.go 也会在 $(APIROOT)/pkg/api/apiserver/v1/miniblog.pb.go。
