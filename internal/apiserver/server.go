@@ -81,11 +81,15 @@ func (cfg *Config) NewUnionServer() (*UnionServer, error) {
 
 // Run 运行应用.
 func (s *UnionServer) Run() error {
+	// 1. 打印日志并启动 gRPC 服务
 	// 打印一条日志，用来提示 GRPC 服务已经起来，方便排障
 	log.Infow("Start to listening the incoming requests on grpc address", "addr", s.cfg.GRPCOptions.Addr)
 	// nolint: errcheck
-	go s.srv.Serve(s.lis)
+	go s.srv.Serve(s.lis) // 使用 goroutine 异步启动 gRPC 服务，这样不会阻塞后续代码的执行
 
+	// 2. 创建一个 gRPC 客户端连接：连接到本地的 gRPC 服务（即自己），用于支持 gRPC-Gateway。
+	// grpc.WithBlock()：表示客户端在连接建立之前会阻塞，直到连接成功或失败。这通常用于确保连接可用后再继续执行后续逻辑。
+	// grpc.WithTransportCredentials(insecure.NewCredentials())：使用不安全的传输凭证，意味着通信不会加密（如不使用 TLS）。这通常用于本地开发或测试环境，在生产环境中应使用安全的凭证（如 TLS）。
 	//nolint: staticcheck
 	dialOptions := []grpc.DialOption{grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials())}
 
@@ -94,6 +98,8 @@ func (s *UnionServer) Run() error {
 		return err
 	}
 
+	// 3. 创建 gRPC-Gateway 的 ServeMux 并注册服务处理器：将 gRPC 服务映射到 HTTP 路由上，使得可以通过 HTTP 访问 gRPC 服务。
+	// 创建一个新的 gRPC-Gateway 的 HTTP 路由处理器（ServeMux），用于将 HTTP 请求转发到对应的 gRPC 服务。
 	gwmux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
 		MarshalOptions: protojson.MarshalOptions{
 			// 设置序列化 protobuf 数据时，枚举类型的字段以数字格式输出.
@@ -101,10 +107,12 @@ func (s *UnionServer) Run() error {
 			UseEnumNumbers: true,
 		},
 	}))
+	// 将具体的 gRPC 服务（MiniBlog）注册到 gRPC-Gateway 的路由处理器中
 	if err := apiv1.RegisterMiniBlogHandler(context.Background(), gwmux, conn); err != nil {
 		return err
 	}
 
+	// 4. 启动 HTTP 服务器：在配置的 HTTP 地址上监听并处理来自客户端的 HTTP 请求。
 	log.Infow("Start to listening the incoming requests", "protocol", "http", "addr", s.cfg.HTTPOptions.Addr)
 	httpsrv := &http.Server{
 		Addr:    s.cfg.HTTPOptions.Addr,
