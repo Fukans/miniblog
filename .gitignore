@@ -12,3 +12,4 @@ go.work.sum
 # 自定义文件
 /_output
 .idea
+test
