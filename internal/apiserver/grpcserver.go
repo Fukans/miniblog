@@ -8,12 +8,13 @@ package apiserver
 
 import (
 	"context"
+	"github.com/onexstack/miniblog/internal/pkg/server"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 
 	handler "github.com/onexstack/miniblog/internal/apiserver/handler/grpc"
-	"github.com/onexstack/miniblog/internal/pkg/server"
+
 	apiv1 "github.com/onexstack/miniblog/pkg/api/apiserver/v1"
 )
 
