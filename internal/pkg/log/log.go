@@ -195,7 +195,10 @@ func W(ctx context.Context) Logger {
 	return std.W(ctx)
 }
 
+// W 基于上下文（context.Context）为日志器动态添加上下文相关字段，最终返回一个携带这些字段的新日志器实例
+// W 可能是 "With" 的缩写，暗示该方法用于为日志器添加额外信息（类似 zap.Logger.With）
 func (l *zapLogger) W(ctx context.Context) Logger {
+	// 由于 log 包会被多个请求并发调用，为防止请求 ID 被污染，每个请求都会对 log 包深拷贝一个 *zapLogger 对象，然后再添加请求 ID。
 	lc := l.clone()
 
 	// 定义一个映射，关联 context 提取函数和日志字段名。

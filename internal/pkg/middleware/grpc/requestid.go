@@ -59,3 +59,10 @@ func RequestIDInterceptor() grpc.UnaryServerInterceptor {
 		return res, nil
 	}
 }
+
+//拦截器的主要职责是在 gRPC 请求处理的前后执行额外逻辑。此拦截器的核心目标是：
+//1. 从请求中提取已有的 `X-Request-ID`（如果客户端传递了）。
+//2. 若不存在则生成新的 UUID 作为 X-Request-ID。
+//3. 将 `X-Request-ID` 传递给响应（让客户端感知）。
+//4. 将 `X-Request-ID` 存入上下文（供服务端内部逻辑使用，如日志、链路追踪）。
+//5. 错误处理时携带 `X-Request-ID`（便于问题定位）。

@@ -6,6 +6,8 @@
 
 package known
 
+// 在 known.go 文件中定义的这些常量，主要作用是用于标识 HTTP/gRPC 请求中的自定义 Header 键名。
+
 // 定义 HTTP/gRPC Header.
 // gRPC 底层使用了 HTTP/2 作为传输协议，而 HTTP/2 的规范
 // 规定 Header 的键必须是小写的。因此，在 gRPC 中，所有的 Header 键都会被强制转换为小写，
